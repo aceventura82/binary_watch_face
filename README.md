@@ -3,7 +3,7 @@
 [![Kotlin](https://img.shields.io/badge/style-1.3.10-green.svg?style=flat&label=Kotlin)](https://kotlinlang.org) 
 
 This Project is a Fork from binary_watch_face
-<a href='https://github.com/euler2dot7/binary_watch_face/>
+https://github.com/euler2dot7/binary_watch_face
 
 Initial Fork:
 Additional Options
