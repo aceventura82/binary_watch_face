@@ -26,7 +26,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath 'com.android.tools.build:gradle:3.6.0-rc02'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -74,10 +74,7 @@ subprojects {
                 }
                 signingConfigs {
                     release {
-                        storeFile file(RELEASE_STORE_FILE)
-                        storePassword RELEASE_STORE_PASSWORD
-                        keyAlias RELEASE_KEY_ALIAS
-                        keyPassword RELEASE_KEY_PASSWORD
+
                     }
                 }
                 buildTypes {
@@ -104,7 +101,7 @@ subprojects {
             task verifyTargetPath {
                 doLast {
                     if (!targetPath.exists()) {
-                        throw new GradleException("Target path not valid!")
+                        throw new FileNotFoundException("Target path not valid!")
                     }
                 }
             }

@@ -3,71 +3,75 @@ package it.golovchenko.binwatch
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.view.View.GONE
+import android.widget.Toast
 import kotlinx.android.synthetic.main.config.*
 
 class DigitalWatchFaceWearableConfigActivity : Activity() {
     companion object {
         const val PREF = "binconf"
-        const val GREEN = "green"
+        const val THEMECOLOR = "theme"
         const val BATTERY = "battery"
-        const val REP_BIN = "bin"
-        const val TXT_BINARY = "010"
-        const val TXT_TERNARY = "+0-"
+        const val SECONDS = "seconds"
+        const val BCD = "bcd"
+        const val HORIZONTAL = "horizontal"
     }
 
-    private var isBin = true
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.config)
-        isBin = BuildConfig.APPLICATION_ID.contains("binwatch")
-        representation.visibility = GONE
-        with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
-            battery.setImageDrawable(
-                resources.getDrawable(
-                    if (getBoolean(BATTERY, true))
-                        R.drawable.ic_remove_battery
-                    else
-                        R.drawable.ic_empty_battery
-                    , baseContext.theme
-                )
-            )
-            color_theme.setImageDrawable(
-                resources.getDrawable(
-                    if (getBoolean(GREEN, false))
-                        R.drawable.ic_color_lens_white_24dp
-                    else
-                        R.drawable.ic_color_lens_green_24dp
-                    , baseContext.theme
-                )
-            )
-            representation.text = if (getBoolean(REP_BIN, isBin)) TXT_TERNARY else TXT_BINARY
-        }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     fun onTheme(view: View) {
         with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
-            edit().putBoolean(GREEN, !getBoolean(GREEN, false)).apply()
+
+            val theme=when (view.id){
+                R.id.theme_red -> "RED"
+                R.id.theme_blue -> "BLUE"
+                R.id.theme_dark -> "DARK"
+                R.id.theme_cyan -> "CYAN"
+                R.id.theme_gray -> "GRAY"
+                R.id.theme_green -> "GREEN"
+                R.id.theme_magenta -> "MAGENTA"
+                R.id.theme_pink -> "PINK"
+                R.id.theme_yellow -> "YELLOW"
+                else -> "WHITE"
+            }
+            edit().putString(THEMECOLOR, theme).apply()
+            Toast.makeText(baseContext, "Theme: $theme", Toast.LENGTH_SHORT).show()
         }
         finish()
     }
 
-    @Suppress("UNUSED_PARAMETER")
     fun onBattery(view: View) {
         with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
             edit().putBoolean(BATTERY, !getBoolean(BATTERY, true)).apply()
+            Toast.makeText(baseContext, "Battery: ${if (!getBoolean(BATTERY, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
         }
         finish()
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun onRep(view: View) {
+    fun vDirection(view: View) {
         with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
-            edit().putBoolean(REP_BIN, !getBoolean(REP_BIN, true)).apply()
+            edit().putBoolean(HORIZONTAL, !getBoolean(HORIZONTAL, true)).apply()
+            Toast.makeText(baseContext, "Horizontal: ${if (!getBoolean(BATTERY, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
         }
         finish()
     }
 
+    fun seconds(view: View) {
+        with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
+            edit().putBoolean(SECONDS, !getBoolean(SECONDS, true)).apply()
+            Toast.makeText(baseContext, "Seconds: ${if (!getBoolean(SECONDS, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
+        }
+        finish()
+    }
+    fun bcd(view: View) {
+        with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
+            edit().putBoolean(BCD, !getBoolean(BCD, true)).apply()
+            Toast.makeText(baseContext, "BCD: ${if (!getBoolean(BATTERY, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
+        }
+        finish()
+    }
 }

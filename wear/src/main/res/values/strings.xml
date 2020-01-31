@@ -6,4 +6,8 @@
     <string name="digital_config_name" translatable="false">config</string>
     <string name="theme_color" translatable="false">theme color</string>
     <string name="show_hide_battery" translatable="false">show / hide battery</string>
+    <string name="vertical_view" translatable="false">Vertical</string>
+    <string name="horizontal_view" translatable="false">Horizontal</string>
+    <string name="seconds">seconds</string>
+    <string name="bcd">BCD</string>
 </resources>
