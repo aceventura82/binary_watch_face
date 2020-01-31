@@ -9,11 +9,21 @@ Initial Fork:
 Additional Options
 
 * Background Image
-* BCD On Off ( Binary Coded Decimal)
-* 10 Theme Colors
-* Horizontal Read On Off
+        To set the Background image place a PNG file in /storage/emulated/0/Download/bg.png on the watch
+* BCD On Off
+        Read on Binary Coded Decimal or Binary
+* New Theme
+        10 New Colors, Red, White, DarkGray, Magenta, green, pink, yellow,cyan,gray,blue
+* Read Direction
+        Read Horizontal or vertical
 * Seconds On Off
-* Visual Help tap, Decimal View double tap
+        Turn off the seconds rows
+* Visual Help
+        tap to show HMS 1 2 4 ... 32 conventions, double tap to view the time in decimal format HH:MM:SS
+* Message(Toast) on Config changes
+* Dots
+        View representation using ones and zeros or dots
+
 
 ## License
 This project is licensed under the GNU General Public License, Version 3, 29 June 2007 (GPLv3) - see the [LICENSE.md](LICENSE.md) file for details

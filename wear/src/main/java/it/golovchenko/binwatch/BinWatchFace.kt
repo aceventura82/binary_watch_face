@@ -1,29 +1,29 @@
 package it.golovchenko.binwatch
 
+import android.Manifest
 import android.content.*
+import android.content.res.Resources
 import android.graphics.*
 import android.graphics.Color.argb
 import android.graphics.Typeface.NORMAL
-import android.os.BatteryManager
-import android.os.Bundle
-import android.os.Handler
-import android.os.Message
+import android.os.*
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
 import android.util.Log
-import android.view.Display
 import android.view.SurfaceHolder
 import android.view.WindowInsets
 import android.view.WindowManager
 import it.golovchenko.binwatch.DigitalWatchFaceWearableConfigActivity.Companion.BATTERY
 import it.golovchenko.binwatch.DigitalWatchFaceWearableConfigActivity.Companion.BCD
+import it.golovchenko.binwatch.DigitalWatchFaceWearableConfigActivity.Companion.DOTS
 import it.golovchenko.binwatch.DigitalWatchFaceWearableConfigActivity.Companion.HORIZONTAL
 import it.golovchenko.binwatch.DigitalWatchFaceWearableConfigActivity.Companion.PREF
 import it.golovchenko.binwatch.DigitalWatchFaceWearableConfigActivity.Companion.SECONDS
 import it.golovchenko.binwatch.DigitalWatchFaceWearableConfigActivity.Companion.THEMECOLOR
+import java.io.File
 import java.lang.ref.WeakReference
 import java.util.*
 import java.util.Calendar.*
@@ -91,10 +91,12 @@ class BinWatchFace : CanvasWatchFaceService() {
         private var mShowBatt: Boolean = false
         private var mSeconds: Boolean = true
         private var mBCD: Boolean = false
+        private var dots: Boolean= false
         private var viewHorizontal: Boolean = true
         private var mTheme: String = ""
         private var width =0
         private var height =0
+        private var fileBg: Boolean= false
 
         //        val fieldsConf = mapOf(true to arrayOf(4, 6, 6, 7), false to arrayOf(3, 5, 5, 5))
         private val mUpdateTimeHandler: Handler = EngineHandler(this)
@@ -133,6 +135,9 @@ class BinWatchFace : CanvasWatchFaceService() {
                 BCD -> {
                     mBCD = pref?.getBoolean(BCD, true) ?: false
                 }
+                DOTS -> {
+                    dots = pref?.getBoolean(DOTS, true) ?: false
+                }
                 HORIZONTAL -> {
                     viewHorizontal = pref?.getBoolean(HORIZONTAL, false) ?: false
                 }
@@ -145,6 +150,7 @@ class BinWatchFace : CanvasWatchFaceService() {
                 mShowBatt = getBoolean(BATTERY, true)
                 mSeconds = getBoolean(SECONDS, true)
                 mBCD = getBoolean(BCD, true)
+                dots = getBoolean(DOTS, false)
                 mTheme = getString(THEMECOLOR, "WHITE") ?: "WHITE"
                 viewHorizontal = getBoolean(HORIZONTAL, false)
                 registerOnSharedPreferenceChangeListener(prefListener)
@@ -155,11 +161,11 @@ class BinWatchFace : CanvasWatchFaceService() {
             display.getSize(size)
             width = size.x
             height = size.y
-            mBackgroundPaint = Paint().apply {
-                color = Color.BLACK
+            if(File(Environment.getExternalStorageDirectory().path +"/Download/bg.png").exists() &&
+                    ContextCompat.checkSelfPermission(baseContext, Manifest.permission.READ_EXTERNAL_STORAGE)==0) {
+                mBackgroundBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().path + "/Download/bg.png"), width, height, false)
+                fileBg=true
             }
-            mBackgroundBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.bg),width,height,false)
-
             setWatchFaceStyle(WatchFaceStyle.Builder(this@BinWatchFace).setAcceptsTapEvents(true).build())
             mCalendar = Calendar.getInstance()
             val resources = this@BinWatchFace.resources
@@ -252,7 +258,7 @@ class BinWatchFace : CanvasWatchFaceService() {
             return retVal
         }
 
-        private fun drawField(canvas: Canvas, bounds: Rect, textPaint: Paint, text: String, amb: Float, nAmb: Float) {
+        private fun drawField(canvas: Canvas, bounds: Rect, textPaint: Paint, text: String, amb: Float, nAmb: Float, drawDots:Boolean=true) {
             val textBounds = Rect()
             textPaint.getTextBounds("".padStart(text.length, '0'), 0, text.length, textBounds)
             val textX = abs(bounds.centerX() - textBounds.centerX()).toFloat()
@@ -260,17 +266,39 @@ class BinWatchFace : CanvasWatchFaceService() {
                 abs(bounds.centerY() - textBounds.centerY() + nAmb * textBounds.centerY())
             else
                 abs(bounds.centerY() - textBounds.centerY() + amb * textBounds.centerY())
-            canvas.drawText(text, textX, textY, textPaint)
+            if(!dots || !drawDots) canvas.drawText(text, textX, textY, textPaint)
+            else drawDot(canvas,textX,textY,text, textPaint)
+        }
+
+        private fun drawDot(canvas: Canvas, posX: Float, posY: Float, text: String, textPaint: Paint ){
+            var c=0
+            val inc = if(textPaint == mBatteryPaint)5f else 10f
+            val rad = if(textPaint == mBatteryPaint)12 else 25
+            for(i in text){
+                if (i == '0'){
+                    mBatteryPaint.style = Paint.Style.STROKE
+                }else if(i == ' '){
+                    c+=rad
+                    continue
+                }else if(i == '%'){
+                    canvas.drawText("%", posX+c, posY-5f, textPaint)
+                    continue
+                }else{
+                    mBatteryPaint.style = Paint.Style.FILL
+                }
+                canvas.drawCircle(posX+c,posY-10f,inc,mBatteryPaint)
+                c+=rad
+            }
         }
 
         override fun onDraw(canvas: Canvas, bounds: Rect) {
             canvas.drawColor(Color.BLACK)
-            if (!mAmbient) canvas.drawBitmap(mBackgroundBitmap, 0f, 0f, mBackgroundPaint)
+            if (!mAmbient && fileBg) canvas.drawBitmap(mBackgroundBitmap, 0f, 0f, mBackgroundPaint)
             val now = System.currentTimeMillis()
             mCalendar.timeInMillis = now
             if (humanTimeCount > 3) {
                 //decimal time
-                drawField(canvas, bounds, mRow2, String.format("%d:%02d:%02d", mCalendar.get(HOUR_OF_DAY), mCalendar.get(MINUTE), mCalendar.get(SECOND)), -1.5F, 0F)
+                drawField(canvas, bounds, mRow2, String.format("%d:%02d:%02d", mCalendar.get(HOUR_OF_DAY), mCalendar.get(MINUTE), mCalendar.get(SECOND)), -1.5F, 0F, false)
             }else{
                 //binary time
                 val data = getDrawData()
@@ -296,52 +324,51 @@ class BinWatchFace : CanvasWatchFaceService() {
         private fun drawHelp(canvas: Canvas, bounds: Rect){
             if (humanTimeCount in 1..3) {
                 if (!viewHorizontal && !mBCD) { //vertical Binary
-                    drawField(canvas, bounds, mBatteryPaint, "32".padEnd(10, ' '), 1.5F, 13F)
-                    drawField(canvas, bounds, mBatteryPaint, "16".padEnd(10, ' '), 1.5F, 6F)
-                    drawField(canvas, bounds, mBatteryPaint, "8".padEnd(10, ' '), 1.5F, -0F)
-                    drawField(canvas, bounds, mBatteryPaint, "4".padEnd(10, ' '), 1.5F, -6F)
-                    drawField(canvas, bounds, mBatteryPaint, "2".padEnd(10, ' '), 1.5F, -13F)
-                    drawField(canvas, bounds, mBatteryPaint, "1".padEnd(10, ' '), 1.5F, -19F)
+                    drawField(canvas, bounds, mBatteryPaint, "32".padEnd(10, ' '), 1.5F, 13F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "16".padEnd(10, ' '), 1.5F, 6F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "8".padEnd(10, ' '), 1.5F, -0F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "4".padEnd(10, ' '), 1.5F, -6F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "2".padEnd(10, ' '), 1.5F, -13F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "1".padEnd(10, ' '), 1.5F, -19F, false)
                     if(mSeconds){
-                        drawField(canvas, bounds, mBatteryPaint, "H M S", 1.5F, 18F)
+                        drawField(canvas, bounds, mBatteryPaint, "H M S", 1.5F, 18F, false)
                     }else{
-                        drawField(canvas, bounds, mBatteryPaint, "H M", 1.5F, 18F)
+                        drawField(canvas, bounds, mBatteryPaint, "H M", 1.5F, 18F, false)
                     }
                 } else if (viewHorizontal && !mBCD) { // Horizontal Binary
-                    drawField(canvas, bounds, mBatteryPaint, "32 16 8 4 2 1", 1.5F, 11.5F)
+                    drawField(canvas, bounds, mBatteryPaint, "32 16 8 4 2 1", 1.5F, 11.5F, false)
                     if(mSeconds){
-                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(20, ' '), 1.5F, 6.5F)
-                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(20, ' '), 1.5F, 0.5F)
-                        drawField(canvas, bounds, mBatteryPaint, "S".padEnd(20, ' '), 1.5F, -6.5F)
+                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(20, ' '), 1.5F, 6.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(20, ' '), 1.5F, 0.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "S".padEnd(20, ' '), 1.5F, -6.5F, false)
                     }else{
-                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(20, ' '), 1.5F, 2.5F)
-                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(20, ' '), 1.5F, -4.5F)
+                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(20, ' '), 1.5F, 2.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(20, ' '), 1.5F, -4.5F, false)
                     }
                 } else if (!viewHorizontal && mBCD) { //Vertical BCD
-                    drawField(canvas, bounds, mBatteryPaint, "8".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 12.5F)
-                    drawField(canvas, bounds, mBatteryPaint, "4".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 6.5F)
-                    drawField(canvas, bounds, mBatteryPaint, "2".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 0.5F)
-                    drawField(canvas, bounds, mBatteryPaint, "1".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, -6.5F)
+                    drawField(canvas, bounds, mBatteryPaint, "8".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 12.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "4".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 6.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "2".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 0.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "1".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, -6.5F, false)
                     if(mSeconds){
-                        drawField(canvas, bounds, mBatteryPaint, "H  H  M  M  S  S", 1.5F, 18F)
+                        drawField(canvas, bounds, mBatteryPaint, "H  H  M  M  S  S", 1.5F, 18F, false)
                     }else{
-                        drawField(canvas, bounds, mBatteryPaint, "H  H  M  M", 1.5F, 18F)
+                        drawField(canvas, bounds, mBatteryPaint, "H  H  M  M", 1.5F, 18F, false)
                     }
                 } else if (viewHorizontal && mBCD) { //Horizontal BCD
-                    drawField(canvas, bounds, mBatteryPaint, " 4  2 1   8  4  2 1", 1.5F, 11.5F)
+                    drawField(canvas, bounds, mBatteryPaint, " 4  2 1   8  4  2 1", 1.5F, 11.5F, false)
                     if(mSeconds){
-                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(25, ' '), 1.5F, 6.5F)
-                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(25, ' '), 1.5F, 0.5F)
-                        drawField(canvas, bounds, mBatteryPaint, "S".padEnd(25, ' '), 1.5F, -6.5F)
+                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(25, ' '), 1.5F, 6.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(25, ' '), 1.5F, 0.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "S".padEnd(25, ' '), 1.5F, -6.5F, false)
                     }else{
-                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(25, ' '), 1.5F, 2.5F)
-                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(25, ' '), 1.5F, -4.5F)
+                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(25, ' '), 1.5F, 2.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(25, ' '), 1.5F, -4.5F, false)
                     }
                 }
             }
         }
 
-        // type: 0 Vertical, 1: Horizontal
         private fun getDrawData(): ArrayList<String>{
             // convert time to Binary
             val time = if(mBCD) arrayListOf<String>( //BCD
@@ -413,7 +440,7 @@ class BinWatchFace : CanvasWatchFaceService() {
                     "$bat1 $bat2%"
                 }
                 if(humanTimeCount > 3){
-                    drawField(canvas, bounds, mBatteryPaint, getBatteryLevel().toString()+"%", 0F, -4.5F)
+                    drawField(canvas, bounds, mBatteryPaint, getBatteryLevel().toString()+"%", 0F, -4.5F,false)
                 }else{
                     drawField(canvas, bounds, mBatteryPaint, batteryText, 0F, -12.5F)
                 }

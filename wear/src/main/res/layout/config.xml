@@ -137,6 +137,13 @@
             android:contentDescription="@string/bcd"
             android:onClick="bcd"
             android:src="@drawable/ic_forward_10_black_24dp" />
+        <ImageView
+            android:id="@+id/dots"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/bcd"
+            android:onClick="dots"
+            android:src="@drawable/ic_more_horiz_black_24dp" />
 
     </LinearLayout>
 </LinearLayout>
