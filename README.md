@@ -8,26 +8,34 @@ https://github.com/euler2dot7/binary_watch_face
 Additional Options
 
 * Background Image
+
         To set the Background image place a PNG file in /storage/emulated/0/Download/bg.png on the watch
 * BCD On Off
+
         Read on Binary Coded Decimal or Binary
 * New Theme
+
         10 New Colors, Red, White, DarkGray, Magenta, green, pink, yellow,cyan,gray,blue
 * Read Direction
+
         Read Horizontal or vertical
 * Seconds On Off
+
         Turn off the seconds rows
 * Visual Help
+
         tap to show HMS 1 2 4 ... 32 conventions, double tap to view the time in decimal format HH:MM:SS
 * Message(Toast) on Config changes
 * Dots
+
         View representation using ones and zeros or dots
 
 
 READ_EXTERNAL_STORAGE permission for read the background file in Download folder
 
 Download:
-https://github.com/aceventura82/binary_watch_face/wear/wear-debug.apk
+
+https://github.com/aceventura82/binary_watch_face/raw/master/wear/wear-debug.apk
 
 
 ## License
