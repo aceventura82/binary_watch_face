@@ -5,7 +5,6 @@
 This Project is a Fork from binary_watch_face
 https://github.com/euler2dot7/binary_watch_face
 
-Initial Fork:
 Additional Options
 
 * Background Image
@@ -23,6 +22,12 @@ Additional Options
 * Message(Toast) on Config changes
 * Dots
         View representation using ones and zeros or dots
+
+
+READ_EXTERNAL_STORAGE permission for read the background file in Download folder
+
+Download:
+https://github.com/aceventura82/binary_watch_face/wear/build/outputs/apk/debug/wear-debug.apk
 
 
 ## License
