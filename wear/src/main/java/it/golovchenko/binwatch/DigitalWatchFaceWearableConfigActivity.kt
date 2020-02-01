@@ -57,7 +57,7 @@ class DigitalWatchFaceWearableConfigActivity : Activity() {
     fun vDirection(view: View) {
         with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
             edit().putBoolean(HORIZONTAL, !getBoolean(HORIZONTAL, true)).apply()
-            Toast.makeText(baseContext, "Horizontal: ${if (!getBoolean(BATTERY, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(baseContext, "Horizontal: ${if (!getBoolean(HORIZONTAL, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
         }
         finish()
     }
@@ -76,7 +76,7 @@ class DigitalWatchFaceWearableConfigActivity : Activity() {
     fun bcd(view: View) {
         with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
             edit().putBoolean(BCD, !getBoolean(BCD, true)).apply()
-            Toast.makeText(baseContext, "BCD: ${if (!getBoolean(BATTERY, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(baseContext, "BCD: ${if (!getBoolean(BCD, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
         }
         finish()
     }

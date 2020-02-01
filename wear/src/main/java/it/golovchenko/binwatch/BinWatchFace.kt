@@ -139,7 +139,7 @@ class BinWatchFace : CanvasWatchFaceService() {
                     dots = pref?.getBoolean(DOTS, true) ?: false
                 }
                 HORIZONTAL -> {
-                    viewHorizontal = pref?.getBoolean(HORIZONTAL, false) ?: false
+                    viewHorizontal = pref?.getBoolean(HORIZONTAL, true) ?: false
                 }
             }
         }
@@ -152,7 +152,7 @@ class BinWatchFace : CanvasWatchFaceService() {
                 mBCD = getBoolean(BCD, true)
                 dots = getBoolean(DOTS, false)
                 mTheme = getString(THEMECOLOR, "WHITE") ?: "WHITE"
-                viewHorizontal = getBoolean(HORIZONTAL, false)
+                viewHorizontal = getBoolean(HORIZONTAL, true)
                 registerOnSharedPreferenceChangeListener(prefListener)
             }
             val wm = baseContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -253,9 +253,7 @@ class BinWatchFace : CanvasWatchFaceService() {
 
             val level = batteryStatus?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: 0
             val scale = batteryStatus?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: 1
-            val retVal = (level / scale.toFloat() * 100F).toInt()
-
-            return retVal
+            return (level / scale.toFloat() * 100F).toInt()
         }
 
         private fun drawField(canvas: Canvas, bounds: Rect, textPaint: Paint, text: String, amb: Float, nAmb: Float, drawDots:Boolean=true) {
@@ -441,6 +439,8 @@ class BinWatchFace : CanvasWatchFaceService() {
                 }
                 if(humanTimeCount > 3){
                     drawField(canvas, bounds, mBatteryPaint, getBatteryLevel().toString()+"%", 0F, -4.5F,false)
+                }else if(!mBCD && !viewHorizontal){
+                    drawField(canvas, bounds, mBatteryPaint, batteryText.padEnd(30,' '), 0F, 0F)
                 }else{
                     drawField(canvas, bounds, mBatteryPaint, batteryText, 0F, -12.5F)
                 }
