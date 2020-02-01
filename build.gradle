@@ -6,10 +6,8 @@ buildscript {
         kotlin_version = '1.3.20'
         appId = 'it.golovchenko'
         binarySufix = "binwatch"
-        ternarySufix = "terwatch"
 
-        appNameTernary = 'BinWatch'
-        appNameBinary = 'TernaryWatch'
+        appNameBinary = 'BinaryWatch'
         releasePath = '/dev/shm/'
         versionMajor = 0
         versionMinor = 1
@@ -83,14 +81,7 @@ subprojects {
                         signingConfig signingConfigs.release
                         applicationIdSuffix = binarySufix
                     }
-                    releaseTernary {
-                        manifestPlaceholders = [appName: appNameTernary]
-                        applicationIdSuffix = ternarySufix
-                        signingConfig signingConfigs.release
-                    }
                     debug {
-//                        manifestPlaceholders = [appName: appNameTernary]
-//                        applicationIdSuffix = ternarySufix
                         manifestPlaceholders = [appName: appNameBinary]
                         applicationIdSuffix = binarySufix
                     }
@@ -109,22 +100,6 @@ subprojects {
                 doLast {
                     ext.apkName = "release_${project.name}_-_${generateVersionName()}.apk"
                     ext.apk = file("${project.name}/build/outputs/apk/release/${project.name}-release.apk")
-                    print ext.apk
-                    print "\n"
-
-                    if (ext.apk.exists()) {
-                        copy {
-                            from ext.apk.absolutePath
-                            into targetPath
-                            rename { ext.apkName }
-                        }
-                    }
-                }
-            }
-            task buildReleaseTernaryApk(dependsOn: ['verifyTargetPath', 'assembleReleaseTernary'], group: "a_create_release") {
-                doLast {
-                    ext.apkName = "releaseTernary_${project.name}_-_${generateVersionName()}.apk"
-                    ext.apk = file("${project.name}/build/outputs/apk/releaseTernary/${project.name}-releaseTernary.apk")
                     print ext.apk
                     print "\n"
 

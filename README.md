@@ -27,7 +27,7 @@ Additional Options
 READ_EXTERNAL_STORAGE permission for read the background file in Download folder
 
 Download:
-https://github.com/aceventura82/binary_watch_face/wear/build/outputs/apk/debug/wear-debug.apk
+https://github.com/aceventura82/binary_watch_face/wear/wear-debug.apk
 
 
 ## License

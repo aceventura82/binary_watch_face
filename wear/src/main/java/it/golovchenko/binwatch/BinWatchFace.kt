@@ -88,7 +88,7 @@ class BinWatchFace : CanvasWatchFaceService() {
         private var mLowBitAmbient: Boolean = false
         private var mBurnInProtection: Boolean = false
         private var mAmbient: Boolean = false
-        private var mShowBatt: Boolean = false
+        private var mShowBatt: Boolean = true
         private var mSeconds: Boolean = true
         private var mBCD: Boolean = false
         private var dots: Boolean= false
@@ -133,10 +133,10 @@ class BinWatchFace : CanvasWatchFaceService() {
                     mSeconds = pref?.getBoolean(SECONDS, true) ?: false
                 }
                 BCD -> {
-                    mBCD = pref?.getBoolean(BCD, true) ?: false
+                    mBCD = pref?.getBoolean(BCD, false) ?: false
                 }
                 DOTS -> {
-                    dots = pref?.getBoolean(DOTS, true) ?: false
+                    dots = pref?.getBoolean(DOTS, false) ?: false
                 }
                 HORIZONTAL -> {
                     viewHorizontal = pref?.getBoolean(HORIZONTAL, true) ?: false
@@ -149,7 +149,7 @@ class BinWatchFace : CanvasWatchFaceService() {
             with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
                 mShowBatt = getBoolean(BATTERY, true)
                 mSeconds = getBoolean(SECONDS, true)
-                mBCD = getBoolean(BCD, true)
+                mBCD = getBoolean(BCD, false)
                 dots = getBoolean(DOTS, false)
                 mTheme = getString(THEMECOLOR, "WHITE") ?: "WHITE"
                 viewHorizontal = getBoolean(HORIZONTAL, true)
@@ -270,8 +270,8 @@ class BinWatchFace : CanvasWatchFaceService() {
 
         private fun drawDot(canvas: Canvas, posX: Float, posY: Float, text: String, textPaint: Paint ){
             var c=0
-            val inc = if(textPaint == mBatteryPaint)5f else 10f
-            val rad = if(textPaint == mBatteryPaint)12 else 25
+            val inc = if(textPaint == mBatteryPaint)10f else 15f
+            val rad = if(textPaint == mBatteryPaint)24 else 35
             for(i in text){
                 if (i == '0'){
                     mBatteryPaint.style = Paint.Style.STROKE

@@ -75,7 +75,7 @@ class DigitalWatchFaceWearableConfigActivity : Activity() {
     @Suppress("UNUSED_PARAMETER")
     fun bcd(view: View) {
         with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
-            edit().putBoolean(BCD, !getBoolean(BCD, true)).apply()
+            edit().putBoolean(BCD, !getBoolean(BCD, false)).apply()
             Toast.makeText(baseContext, "BCD: ${if (!getBoolean(BCD, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
         }
         finish()
@@ -83,7 +83,7 @@ class DigitalWatchFaceWearableConfigActivity : Activity() {
     @Suppress("UNUSED_PARAMETER")
     fun dots(view: View) {
         with(getSharedPreferences(PREF, Context.MODE_PRIVATE)) {
-            edit().putBoolean(DOTS, !getBoolean(DOTS, true)).apply()
+            edit().putBoolean(DOTS, !getBoolean(DOTS, false)).apply()
             Toast.makeText(baseContext, "Dots: ${if (!getBoolean(DOTS, false)) "Off" else "On"}", Toast.LENGTH_SHORT).show()
         }
         finish()
