@@ -2,7 +2,6 @@ package it.golovchenko.binwatch
 
 import android.Manifest
 import android.content.*
-import android.content.res.Resources
 import android.graphics.*
 import android.graphics.Color.argb
 import android.graphics.Typeface.NORMAL
@@ -167,8 +166,8 @@ class BinWatchFace : CanvasWatchFaceService() {
                 fileBg=true
             }
             setWatchFaceStyle(WatchFaceStyle.Builder(this@BinWatchFace).setAcceptsTapEvents(true).build())
-            mCalendar = Calendar.getInstance()
-            val resources = this@BinWatchFace.resources
+            mCalendar = getInstance()
+            //val resources = this@BinWatchFace.resources
             mYOffset = resources.getDimension(R.dimen.digital_y_offset)
             // Initializes background.
             mBackgroundPaint = Paint().apply { color = ContextCompat.getColor(applicationContext, R.color.background) }
@@ -256,14 +255,11 @@ class BinWatchFace : CanvasWatchFaceService() {
             return (level / scale.toFloat() * 100F).toInt()
         }
 
-        private fun drawField(canvas: Canvas, bounds: Rect, textPaint: Paint, text: String, amb: Float, nAmb: Float, drawDots:Boolean=true) {
+        private fun drawField(canvas: Canvas, bounds: Rect, textPaint: Paint, text: String, nAmb: Float, drawDots:Boolean=true) {
             val textBounds = Rect()
             textPaint.getTextBounds("".padStart(text.length, '0'), 0, text.length, textBounds)
             val textX = abs(bounds.centerX() - textBounds.centerX()).toFloat()
-            val textY = if (!mAmbient)
-                abs(bounds.centerY() - textBounds.centerY() + nAmb * textBounds.centerY())
-            else
-                abs(bounds.centerY() - textBounds.centerY() + amb * textBounds.centerY())
+            val textY = abs(bounds.centerY() - textBounds.centerY() + nAmb * textBounds.centerY())
             if(!dots || !drawDots) canvas.drawText(text, textX, textY, textPaint)
             else drawDot(canvas,textX,textY,text, textPaint)
         }
@@ -296,21 +292,21 @@ class BinWatchFace : CanvasWatchFaceService() {
             mCalendar.timeInMillis = now
             if (humanTimeCount > 3) {
                 //decimal time
-                drawField(canvas, bounds, mRow2, String.format("%d:%02d:%02d", mCalendar.get(HOUR_OF_DAY), mCalendar.get(MINUTE), mCalendar.get(SECOND)), -1.5F, 0F, false)
+                drawField(canvas, bounds, mRow2, String.format("%d:%02d:%02d", mCalendar.get(HOUR_OF_DAY), mCalendar.get(MINUTE), mCalendar.get(SECOND)),0F, false)
             }else{
                 //binary time
                 val data = getDrawData()
                 val startPos=if(!viewHorizontal){ 5F }else if(!viewHorizontal && !mBCD){ 7.5F } else if(mSeconds)2.5F else 1F
                 //visual help
                 drawHelp(canvas,bounds)
-                drawField(canvas, bounds, mRow1, data[0], 1.5F, startPos)
-                drawField(canvas, bounds, mRow2, data[1], 1.5F, startPos-2.5F)
-                drawField(canvas, bounds, mRow3, data[2], 1.5F, startPos-5F)
-                if(!viewHorizontal && mBCD) drawField(canvas, bounds, mRow4, data[3], 1.5F, startPos-7.5F)
+                drawField(canvas, bounds, mRow1, data[0],  startPos)
+                drawField(canvas, bounds, mRow2, data[1],  startPos-2.5F)
+                drawField(canvas, bounds, mRow3, data[2],  startPos-5F)
+                if(!viewHorizontal && mBCD) drawField(canvas, bounds, mRow4, data[3],  startPos-7.5F)
                 if(!viewHorizontal && !mBCD){
-                    drawField(canvas, bounds, mRow4, data[3], 1.5F, startPos-7.5F)
-                    drawField(canvas, bounds, mRow4, data[4], 1.5F, startPos-10F)
-                    drawField(canvas, bounds, mRow4, data[5], 1.5F, startPos-12.5F)
+                    drawField(canvas, bounds, mRow4, data[3],  startPos-7.5F)
+                    drawField(canvas, bounds, mRow4, data[4],  startPos-10F)
+                    drawField(canvas, bounds, mRow4, data[5],  startPos-12.5F)
                 }
             }
             drawBattery(canvas, bounds)
@@ -322,46 +318,46 @@ class BinWatchFace : CanvasWatchFaceService() {
         private fun drawHelp(canvas: Canvas, bounds: Rect){
             if (humanTimeCount in 1..3) {
                 if (!viewHorizontal && !mBCD) { //vertical Binary
-                    drawField(canvas, bounds, mBatteryPaint, "32".padEnd(10, ' '), 1.5F, 13F, false)
-                    drawField(canvas, bounds, mBatteryPaint, "16".padEnd(10, ' '), 1.5F, 6F, false)
-                    drawField(canvas, bounds, mBatteryPaint, "8".padEnd(10, ' '), 1.5F, -0F, false)
-                    drawField(canvas, bounds, mBatteryPaint, "4".padEnd(10, ' '), 1.5F, -6F, false)
-                    drawField(canvas, bounds, mBatteryPaint, "2".padEnd(10, ' '), 1.5F, -13F, false)
-                    drawField(canvas, bounds, mBatteryPaint, "1".padEnd(10, ' '), 1.5F, -19F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "32".padEnd(10, ' '),  13F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "16".padEnd(10, ' '),  6F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "8".padEnd(10, ' '),  -0F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "4".padEnd(10, ' '),  -6F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "2".padEnd(10, ' '),  -13F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "1".padEnd(10, ' '),  -19F, false)
                     if(mSeconds){
-                        drawField(canvas, bounds, mBatteryPaint, "H M S", 1.5F, 18F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "H M S",  18F, false)
                     }else{
-                        drawField(canvas, bounds, mBatteryPaint, "H M", 1.5F, 18F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "H M",  18F, false)
                     }
                 } else if (viewHorizontal && !mBCD) { // Horizontal Binary
-                    drawField(canvas, bounds, mBatteryPaint, "32 16 8 4 2 1", 1.5F, 11.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "32 16 8 4 2 1",  11.5F, false)
                     if(mSeconds){
-                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(20, ' '), 1.5F, 6.5F, false)
-                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(20, ' '), 1.5F, 0.5F, false)
-                        drawField(canvas, bounds, mBatteryPaint, "S".padEnd(20, ' '), 1.5F, -6.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(20, ' '),  6.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(20, ' '),  0.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "S".padEnd(20, ' '),  -6.5F, false)
                     }else{
-                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(20, ' '), 1.5F, 2.5F, false)
-                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(20, ' '), 1.5F, -4.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(20, ' '),  2.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(20, ' '),  -4.5F, false)
                     }
                 } else if (!viewHorizontal && mBCD) { //Vertical BCD
-                    drawField(canvas, bounds, mBatteryPaint, "8".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 12.5F, false)
-                    drawField(canvas, bounds, mBatteryPaint, "4".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 6.5F, false)
-                    drawField(canvas, bounds, mBatteryPaint, "2".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, 0.5F, false)
-                    drawField(canvas, bounds, mBatteryPaint, "1".padEnd(if (mSeconds) 20 else 15, ' '), 1.5F, -6.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "8".padEnd(if (mSeconds) 20 else 15, ' '),  12.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "4".padEnd(if (mSeconds) 20 else 15, ' '),  6.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "2".padEnd(if (mSeconds) 20 else 15, ' '),  0.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, "1".padEnd(if (mSeconds) 20 else 15, ' '),  -6.5F, false)
                     if(mSeconds){
-                        drawField(canvas, bounds, mBatteryPaint, "H  H  M  M  S  S", 1.5F, 18F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "H  H  M  M  S  S",  18F, false)
                     }else{
-                        drawField(canvas, bounds, mBatteryPaint, "H  H  M  M", 1.5F, 18F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "H  H  M  M",  18F, false)
                     }
                 } else if (viewHorizontal && mBCD) { //Horizontal BCD
-                    drawField(canvas, bounds, mBatteryPaint, " 4  2 1   8  4  2 1", 1.5F, 11.5F, false)
+                    drawField(canvas, bounds, mBatteryPaint, " 4  2 1   8  4  2 1",  11.5F, false)
                     if(mSeconds){
-                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(25, ' '), 1.5F, 6.5F, false)
-                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(25, ' '), 1.5F, 0.5F, false)
-                        drawField(canvas, bounds, mBatteryPaint, "S".padEnd(25, ' '), 1.5F, -6.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(25, ' '),6.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(25, ' '),0.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "S".padEnd(25, ' '),-6.5F, false)
                     }else{
-                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(25, ' '), 1.5F, 2.5F, false)
-                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(25, ' '), 1.5F, -4.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "H".padEnd(25, ' '),2.5F, false)
+                        drawField(canvas, bounds, mBatteryPaint, "M".padEnd(25, ' '),  -4.5F, false)
                     }
                 }
             }
@@ -369,7 +365,7 @@ class BinWatchFace : CanvasWatchFaceService() {
 
         private fun getDrawData(): ArrayList<String>{
             // convert time to Binary
-            val time = if(mBCD) arrayListOf<String>( //BCD
+            val time = if(mBCD) arrayListOf( //BCD
                     convertToBin(mCalendar.get(HOUR_OF_DAY).div(10)).padStart(2, '0'),
                     convertToBin(mCalendar.get(HOUR_OF_DAY).rem(10)).padStart(4, '0'),
                     convertToBin(mCalendar.get(MINUTE).div(10)).padStart(3, '0'),
@@ -378,7 +374,7 @@ class BinWatchFace : CanvasWatchFaceService() {
                     convertToBin(mCalendar.get(SECOND).rem(10)).padStart(4, '0')
                 )
             else
-                arrayListOf<String>( //Binary
+                arrayListOf( //Binary
                     convertToBin(mCalendar.get(HOUR_OF_DAY)).padStart(4, '0'),
                     convertToBin(mCalendar.get(MINUTE)).padStart(6, '0'),
                     convertToBin(mCalendar.get(SECOND)).padStart(6, '0')
@@ -438,11 +434,11 @@ class BinWatchFace : CanvasWatchFaceService() {
                     "$bat1 $bat2%"
                 }
                 if(humanTimeCount > 3){
-                    drawField(canvas, bounds, mBatteryPaint, getBatteryLevel().toString()+"%", 0F, -4.5F,false)
+                    drawField(canvas, bounds, mBatteryPaint, getBatteryLevel().toString()+"%", -4.5F,false)
                 }else if(!mBCD && !viewHorizontal){
-                    drawField(canvas, bounds, mBatteryPaint, batteryText.padEnd(30,' '), 0F, 0F)
+                    drawField(canvas, bounds, mBatteryPaint, batteryText.padEnd(30,' '), 0F)
                 }else{
-                    drawField(canvas, bounds, mBatteryPaint, batteryText, 0F, -12.5F)
+                    drawField(canvas, bounds, mBatteryPaint, batteryText, -12.5F)
                 }
             }
         }
